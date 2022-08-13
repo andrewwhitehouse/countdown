@@ -20,4 +20,6 @@
   (testing "two distinct elements"
     (is (= [[1] [3] [1 3]] (candidates [1 3]))))
   (testing "duplicate elements"
-    (is (= [[5] [2] [2 5] [2 5 5]] (candidates [5 2 5])))))
+    (is (= [[5] [2] [5 5] [5 2] [5 5 2]] (candidates [5 2 5]))))
+  (testing "three distinct elements"
+    (is (= [[1] [2] [3] [1 2] [1 3] [2 3] [1 2 3] ] (candidates [1 2 3])))))
