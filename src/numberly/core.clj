@@ -40,9 +40,32 @@
 
 (defn candidates [numbers]
   (mapcat
-    (fn [len]
-      (combo/combinations numbers len))
+    (fn [cnt]
+      (combo/combinations numbers cnt))
     (range 1 (inc (count numbers)))))
+
+(defn candidate-steps [candidates]
+  (map (fn [numbers] {:numbers numbers :steps []}) candidates))
+
+(defn replace-pair [coll index new-value]
+  (if (> index (- (count coll) 2))
+    (throw (IllegalArgumentException. "index out of range")))
+  (concat
+    (take index coll)
+    [new-value]
+    (take (- (count coll) 2) (drop (+ 2 index) coll))))
+
+(defn apply-operator [{:keys [numbers steps]} operator]
+  (condp = operator
+    '+ (mapv (fn [pair-index]
+               (let [a (nth numbers pair-index)
+                     b (nth numbers (inc pair-index))
+                     _ (println "a" a "b" b)
+                     result (+ a b)]
+                 {:numbers (replace-pair numbers pair-index result)
+                  :steps (conj steps {:left a :right b :op operator :result (+ a b)})}))
+             (range 0 (dec (count numbers))))
+    :else []))
 
 (defn -main [& args]
   (println "Numbers" (str/join " " (numbers 4 2)))
