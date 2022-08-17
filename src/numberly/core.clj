@@ -60,7 +60,6 @@
     '+ (mapv (fn [pair-index]
                (let [a (nth numbers pair-index)
                      b (nth numbers (inc pair-index))
-                     _ (println "a" a "b" b)
                      result (+ a b)]
                  {:numbers (replace-pair numbers pair-index result)
                   :steps (conj steps {:left a :right b :op operator :result (+ a b)})}))
@@ -70,13 +69,11 @@
 (defn iterate-operator [{:keys [numbers steps] :as candidate-steps} operator total]
   (loop [remaining [candidate-steps]
          matched []]
-    (println "remaining" remaining "matched" matched)
     (if-let [candidate (first remaining)]
       (let [result (split-with
                      #(and (= 1 (count (:numbers %)))
                            (= total (first (:numbers %))))
                      (apply-operator candidate operator))]
-        (println "result" result)
         (recur
           (concat
             (rest remaining)
@@ -84,6 +81,11 @@
           (concat matched (first result))))
       matched)))
 
+(defn solve [numbers total operator]
+  (->> numbers
+      candidates
+      candidate-steps
+      (mapcat #(iterate-operator % operator total))))
 
 (defn -main [& args]
   (println "Numbers" (str/join " " (numbers 4 2)))
@@ -91,7 +93,7 @@
 
 (comment
 
-  (iterate-operator {:numbers [1 2 3] :steps []} '+ 6)
+  (clojure.pprint/pprint (solve [1 2 3 4] 7 '+))
 
 
   )
