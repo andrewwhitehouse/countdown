@@ -67,17 +67,32 @@
              (range 0 (dec (count numbers))))
     :else []))
 
+(defn iterate-operator [{:keys [numbers steps] :as candidate-steps} operator total]
+  (loop [remaining [candidate-steps]
+         matched []]
+    (println "remaining" remaining "matched" matched)
+    (if-let [candidate (first remaining)]
+      (let [result (split-with
+                     #(and (= 1 (count (:numbers %)))
+                           (= total (first (:numbers %))))
+                     (apply-operator candidate operator))]
+        (println "result" result)
+        (recur
+          (concat
+            (rest remaining)
+            (filter #(> (count (:numbers %)) 1) (second result)))
+          (concat matched (first result))))
+      matched)))
+
+
 (defn -main [& args]
   (println "Numbers" (str/join " " (numbers 4 2)))
   (println "Target" (+ 200 (rand-int 800))))
 
 (comment
 
-  (require '[clojure.math.combinatorics :as combo])
-  (mapcat #(combo/combinations [1, 9, 3, 1, 75, 100] %) (range 2 7))
+  (iterate-operator {:numbers [1 2 3] :steps []} '+ 6)
 
-  (require '[clojure.math.combinatorics :as combo])
-  (combo/combinations [1 4 9 16] 3)
 
   )
 
