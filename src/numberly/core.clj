@@ -55,23 +55,21 @@
     [new-value]
     (take (- (count coll) 2) (drop (+ 2 index) coll))))
 
+(defn apply-to-pair [numbers pair-index operator]
+  (let [a (nth numbers pair-index)
+        b (nth numbers (inc pair-index))
+        result (condp = operator
+                 '+ (+ a b)
+                 '* (* a b)
+                 nil)]
+    {:left a :right b :op operator :result result}))
+
 (defn apply-operator [{:keys [numbers steps]} operator]
-  (condp = operator
-    '+ (mapv (fn [pair-index]
-               (let [a (nth numbers pair-index)
-                     b (nth numbers (inc pair-index))
-                     result (+ a b)]
+  (mapv (fn [pair-index]
+               (let [{:keys [left right result]} (apply-to-pair numbers pair-index operator)]
                  {:numbers (replace-pair numbers pair-index result)
-                  :steps (conj steps {:left a :right b :op operator :result (+ a b)})}))
-             (range 0 (dec (count numbers))))
-    '* (mapv (fn [pair-index]
-               (let [a (nth numbers pair-index)
-                     b (nth numbers (inc pair-index))
-                     result (* a b)]
-                 {:numbers (replace-pair numbers pair-index result)
-                  :steps (conj steps {:left a :right b :op operator :result result})}))
-             (range 0 (dec (count numbers))))
-    :else []))
+                  :steps (conj steps {:left left :right right :op operator :result result})}))
+             (range 0 (dec (count numbers)))))
 
 (defn iterate-operator [{:keys [numbers steps] :as candidate-steps} operators total]
   (loop [remaining [candidate-steps]
