@@ -61,8 +61,9 @@
         result (condp = operator
                  '+ (+ a b)
                  '* (* a b)
+                 '- (if (> a b) (- a b) (- b a))
                  nil)]
-    {:left a :right b :op operator :result result}))
+    {:left (if (> a b) a b) :right (if (> a b) b a) :op operator :result result}))
 
 (defn apply-operator [{:keys [numbers steps]} operator]
   (mapv (fn [pair-index]
@@ -75,15 +76,18 @@
   (loop [remaining [candidate-steps]
          matched []]
     (if-let [candidate (first remaining)]
-      (let [result (split-with
-                     #(and (= 1 (count (:numbers %)))
-                           (= total (first (:numbers %))))
-                     (mapcat #(apply-operator candidate %) operators))]
+      (let [results (mapcat #(apply-operator candidate %) operators)
+            matched? (fn [candidate] (and (= 1 (count (:numbers candidate)))
+                                       (= total (first (:numbers candidate)))))
+            new-matches (filter matched? results)
+            unmatched (remove matched? results)]
+        (println "interim result" results)
+        (println "matched" new-matches "remaining" unmatched)
         (recur
           (concat
             (rest remaining)
-            (filter #(> (count (:numbers %)) 1) (second result)))
-          (concat matched (first result))))
+            (filter #(> (count (:numbers %)) 1) unmatched))
+          (concat matched new-matches)))
       matched)))
 
 (defn solve [numbers total operators]
