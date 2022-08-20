@@ -1,6 +1,7 @@
 (ns numberly.core-test
   (:require [clojure.test :refer :all]
-            [numberly.core :refer :all]))
+            [numberly.core :refer :all]
+            [clojure.pprint :refer [pprint]]))
 
 (comment deftest select-numbers
          (testing "number selection"
@@ -37,4 +38,25 @@
                                                   {:left 3, :right 4, :op '+, :result 7}]}
                            {:numbers '(7), :steps [{:left 2, :right 4, :op '+, :result 6}
                                                   {:left 1, :right 6, :op '+, :result 7}]}]]
-      (is (= expected-result (solve [1 2 3 4] 7 '+))))))
+      (is (= expected-result (solve [1 2 3 4] 7 ['+])))))
+  (testing "addition and multiplication"
+    (let [expected-result [{:numbers [7], :steps [{:left 3, :right 4, :op '+, :result 7}]}
+                           {:numbers [7],
+                            :steps
+                                     [{:left 2, :right 3, :op '*, :result 6}
+                                      {:left 1, :right 6, :op '+, :result 7}]}
+                           {:numbers [7],
+                            :steps
+                                     [{:left 1, :right 2, :op '+, :result 3}
+                                      {:left 3, :right 4, :op '+, :result 7}]}
+                           {:numbers [7],
+                            :steps
+                                     [{:left 2, :right 4, :op '+, :result 6}
+                                      {:left 1, :right 6, :op '+, :result 7}]}
+                           {:numbers [7],
+                            :steps
+                                     [{:left 1, :right 3, :op '*, :result 3}
+                                      {:left 3, :right 4, :op '+, :result 7}]}]
+          actual-result (solve [1 2 3 4] 7 ['+ '*])
+          _ (pprint actual-result)]
+      (is (= expected-result (solve [1 2 3 4] 7 ['+ '*]))))))

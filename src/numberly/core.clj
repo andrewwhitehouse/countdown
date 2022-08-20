@@ -64,16 +64,23 @@
                  {:numbers (replace-pair numbers pair-index result)
                   :steps (conj steps {:left a :right b :op operator :result (+ a b)})}))
              (range 0 (dec (count numbers))))
+    '* (mapv (fn [pair-index]
+               (let [a (nth numbers pair-index)
+                     b (nth numbers (inc pair-index))
+                     result (* a b)]
+                 {:numbers (replace-pair numbers pair-index result)
+                  :steps (conj steps {:left a :right b :op operator :result result})}))
+             (range 0 (dec (count numbers))))
     :else []))
 
-(defn iterate-operator [{:keys [numbers steps] :as candidate-steps} operator total]
+(defn iterate-operator [{:keys [numbers steps] :as candidate-steps} operators total]
   (loop [remaining [candidate-steps]
          matched []]
     (if-let [candidate (first remaining)]
       (let [result (split-with
                      #(and (= 1 (count (:numbers %)))
                            (= total (first (:numbers %))))
-                     (apply-operator candidate operator))]
+                     (mapcat #(apply-operator candidate %) operators))]
         (recur
           (concat
             (rest remaining)
@@ -81,11 +88,11 @@
           (concat matched (first result))))
       matched)))
 
-(defn solve [numbers total operator]
+(defn solve [numbers total operators]
   (->> numbers
       candidates
       candidate-steps
-      (mapcat #(iterate-operator % operator total))))
+      (mapcat #(iterate-operator % operators total))))
 
 (defn -main [& args]
   (println "Numbers" (str/join " " (numbers 4 2)))
