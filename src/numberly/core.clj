@@ -55,22 +55,54 @@
     [new-value]
     (take (- (count coll) 2) (drop (+ 2 index) coll))))
 
-(defn apply-to-pair [numbers pair-index operator]
-  (let [a (nth numbers pair-index)
-        b (nth numbers (inc pair-index))
+(defn apply-to-pair [numbers operator index1 index2]
+  (let [a (nth numbers index1)
+        b (nth numbers index2)
+        larger (Math/max a b)
+        smaller (Math/min a b )
         result (condp = operator
                  '+ (+ a b)
                  '* (* a b)
-                 '- (if (> a b) (- a b) (- b a))
-                 nil)]
-    {:left (if (> a b) a b) :right (if (> a b) b a) :op operator :result result}))
+                 '- (when (not= larger smaller) (- larger smaller))
+                 '/ (if (zero? (rem larger smaller)) (/ larger smaller) nil)
+                 nil)
+        _ (comment println "larger" larger "smaller" smaller "result" result)]
+    (when result
+      {:left larger :right smaller :op operator :result result})))
+
+(defn pairs-indexes [coll]
+  (let [cnt (count coll)]
+    (for [a (range cnt)
+          b (range (inc a) cnt)]
+      [a b])))
+
+(defn remove-two
+  "remove elem in coll"
+  [coll index1 index2]
+  (->> (map (fn [idx item] [idx item]) (iterate inc 0) coll)
+       (remove (fn [[idx item]] (or (= index1 idx) (= index2 idx))))
+       (map second)))
+
+(defn debug-> [x message]
+  (println message x)
+  x)
 
 (defn apply-operator [{:keys [numbers steps]} operator]
-  (mapv (fn [pair-index]
-               (let [{:keys [left right result]} (apply-to-pair numbers pair-index operator)]
-                 {:numbers (replace-pair numbers pair-index result)
-                  :steps (conj steps {:left left :right right :op operator :result result})}))
-             (range 0 (dec (count numbers)))))
+  (reduce (fn [acc [index1 index2]]
+            (println "index1" index1 "index2" index2)
+               (if-let [{:keys [left right result] :as m}
+                        (apply-to-pair numbers operator index1 index2)]
+                 (conj
+                   acc
+                   {:numbers (-> numbers
+                                 (debug-> "numbers")
+                                 (remove-two index1 index2)
+                                 (debug-> (str "after remove " index1 " " index2))
+                                 (conj result))
+                    :steps (conj steps {:left left :right right :op operator :result result})})
+                 acc))
+          []
+          (pairs-indexes numbers)))
 
 (defn iterate-operator [{:keys [numbers steps] :as candidate-steps} operators total]
   (loop [remaining [candidate-steps]
@@ -81,8 +113,7 @@
                                        (= total (first (:numbers candidate)))))
             new-matches (filter matched? results)
             unmatched (remove matched? results)]
-        (println "interim result" results)
-        (println "matched" new-matches "remaining" unmatched)
+        (println "new-matches" new-matches "unmatched" unmatched)
         (recur
           (concat
             (rest remaining)
@@ -90,11 +121,19 @@
           (concat matched new-matches)))
       matched)))
 
+
+
+(defn debug->> [message x]
+  (println message x)
+  x)
+
 (defn solve [numbers total operators]
   (->> numbers
       candidates
+     (debug->> "candidates")
       candidate-steps
-      (mapcat #(iterate-operator % operators total))))
+      (mapcat #(iterate-operator % operators total))
+       distinct))
 
 (defn -main [& args]
   (println "Numbers" (str/join " " (numbers 4 2)))
