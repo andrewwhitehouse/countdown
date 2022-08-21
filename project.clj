@@ -6,4 +6,5 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/math.combinatorics "0.1.6"]]
   :repl-options {:init-ns numberly.core}
+  :jvm-opts ["-Xss35m"]
   :main numberly.core)

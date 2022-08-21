@@ -113,10 +113,10 @@
             new-matches (filter matched? results)
             unmatched (remove matched? results)]
         (recur
-          (add-all
-            (subvec remaining 1)
+          (concat
+            (rest remaining)
             (filter #(> (count (:numbers %)) 1) unmatched))
-          (add-all matched new-matches)))
+          (concat matched new-matches)))
       matched)))
 
 
