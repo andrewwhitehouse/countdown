@@ -30,60 +30,74 @@
     (is (= [{:numbers [3 3] :steps [{:left 2 :right 1 :op '+ :result 3}]}
             {:numbers [4 2] :steps [{:left 3 :right 1 :op '+ :result 4}]}
             {:numbers [5 1] :steps [{:left 3 :right 2 :op '+ :result 5}]}]
-           (apply-operator {:numbers [1 2 3] :steps []} '+)))))
+           (apply-operator {:numbers [1 2 3] :steps []} '+ 10)))))
 
 (deftest test-solve
   (comment testing "first case"
-    (let [expected-result [{:numbers '(7), :steps [{:left 4, :right 3, :op '+, :result 7}]}
-                           {:numbers '(7), :steps [{:left 2, :right 1, :op '+, :result 3}
-                                                  {:left 4, :right 3, :op '+, :result 7}]}
-                           {:numbers '(7), :steps [{:left 4, :right 2, :op '+, :result 6}
-                                                  {:left 6, :right 1, :op '+, :result 7}]}]]
-      (is (= expected-result (solve [1 2 3 4] 7 ['+])))))
+           (let [expected-result [{:numbers '(7), :steps [{:left 4, :right 3, :op '+, :result 7}]}
+                                  {:numbers '(7), :steps [{:left 2, :right 1, :op '+, :result 3}
+                                                          {:left 4, :right 3, :op '+, :result 7}]}
+                                  {:numbers '(7), :steps [{:left 4, :right 2, :op '+, :result 6}
+                                                          {:left 6, :right 1, :op '+, :result 7}]}]]
+             (is (= expected-result (solve [1 2 3 4] 7 ['+])))))
   (comment testing "addition and multiplication"
-    (let [expected-result [{:numbers [7], :steps [{:left 4, :right 3, :op '+, :result 7}]}
-                           {:numbers [7],
-                            :steps
-                                     [{:left 3, :right 2, :op '*, :result 6}
-                                      {:left 6, :right 1, :op '+, :result 7}]}
-                           {:numbers [7],
-                            :steps
-                                     [{:left 2, :right 1, :op '+, :result 3}
-                                      {:left 4, :right 3, :op '+, :result 7}]}
-                           {:numbers [7],
-                            :steps
-                                     [{:left 4, :right 2, :op '+, :result 6}
-                                      {:left 6, :right 1, :op '+, :result 7}]}
-                           {:numbers [7],
-                            :steps
-                                     [{:left 4, :right 3, :op '+, :result 7}
-                                      {:left 7, :right 1, :op '*, :result 7}]}
-                           {:numbers [7],
-                            :steps
-                                     [{:left 3, :right 1, :op '*, :result 3}
-                                      {:left 4, :right 3, :op '+, :result 7}]}]
-          actual-result (solve [1 2 3 4] 7 ['+ '*])
-          _ (pprint actual-result)]
-      (is (= expected-result (solve [1 2 3 4] 7 ['+ '*])))))
+           (let [expected-result [{:numbers [7], :steps [{:left 4, :right 3, :op '+, :result 7}]}
+                                  {:numbers [7],
+                                   :steps
+                                            [{:left 3, :right 2, :op '*, :result 6}
+                                             {:left 6, :right 1, :op '+, :result 7}]}
+                                  {:numbers [7],
+                                   :steps
+                                            [{:left 2, :right 1, :op '+, :result 3}
+                                             {:left 4, :right 3, :op '+, :result 7}]}
+                                  {:numbers [7],
+                                   :steps
+                                            [{:left 4, :right 2, :op '+, :result 6}
+                                             {:left 6, :right 1, :op '+, :result 7}]}
+                                  {:numbers [7],
+                                   :steps
+                                            [{:left 4, :right 3, :op '+, :result 7}
+                                             {:left 7, :right 1, :op '*, :result 7}]}
+                                  {:numbers [7],
+                                   :steps
+                                            [{:left 3, :right 1, :op '*, :result 3}
+                                             {:left 4, :right 3, :op '+, :result 7}]}]
+                 actual-result (solve [1 2 3 4] 7 ['+ '*])
+                 _ (pprint actual-result)]
+             (is (= expected-result (solve [1 2 3 4] 7 ['+ '*])))))
   (comment testing "addition, multiplication and subtraction"
-    (let [expected-result [{:numbers [15],
-                            :steps
-                                     [{:left 7, :right 4, :op '-, :result 3}
-                                      {:left 5, :right 3, :op '*, :result 15}]}]
-          actual-result (solve [7 4 5] 15 ['+ '* '-])]
-      (is (= expected-result actual-result))))
+           (let [expected-result [{:numbers [15],
+                                   :steps
+                                            [{:left 7, :right 4, :op '-, :result 3}
+                                             {:left 5, :right 3, :op '*, :result 15}]}]
+                 actual-result (solve [7 4 5] 15 ['+ '* '-])]
+             (is (= expected-result actual-result))))
   (comment testing "division"
-    (let [expected-result [{:numbers [3], :steps [{:left 75, :right 25, :op '/, :result 3}]}]
-          actual-result (solve [75 25] 3 ['/])]
-      (is (= expected-result actual-result))))
+           (let [expected-result [{:numbers [3], :steps [{:left 75, :right 25, :op '/, :result 3}]}]
+                 actual-result (solve [75 25] 3 ['/])]
+             (is (= expected-result actual-result))))
   (comment testing "division and subtraction"
-    (let [expected-result [{:numbers [10], :steps [{:left 75, :right 25, :op '-, :result 50}
-                                                   {:left 50, :right 5, :op '/, :result 10}]}]
-          actual-result (solve [75 25 5] 10 ['/ '-])]
-      (is (= expected-result actual-result))))
+           (let [expected-result [{:numbers [10], :steps [{:left 75, :right 25, :op '-, :result 50}
+                                                          {:left 50, :right 5, :op '/, :result 10}]}]
+                 actual-result (solve [75 25 5] 10 ['/ '-])]
+             (is (= expected-result actual-result))))
   (testing "full test"
-    (let [expected-result []
-          actual-result (solve [1 9 3 175 100] 843 ['+ '- '* '/])]
+    (let [expected-result [{:numbers [843]
+                            :steps   [{:left 100 :right 3 :op '+ :result 103}
+                                      {:left 103 :right 1 :op '- :result 102}
+                                      {:left 102 :right 9 :op '* :result 918}
+                                      {:left 918 :right 75 :op '- :result 843}]}
+                           {:numbers [843]
+                            :steps   [{:left 3 :right 1 :op '- :result 2}
+                                      {:left 100 :right 2 :op '+ :result 102}
+                                      {:left 102 :right 9 :op '* :result 918}
+                                      {:left 918 :right 75 :op '- :result 843}]}
+                           {:numbers [843]
+                            :steps   [{:left 100 :right 1 :op '- :result 99}
+                                      {:left 99 :right 3 :op '+ :result 102}
+                                      {:left 102 :right 9 :op '* :result 918}
+                                      {:left 918 :right 75 :op '- :result 843}]}]
+          actual-result (solve [1 9 3 75 100] 843 ['+ '- '* '/])]
       (is (= expected-result actual-result)))))
 
 (deftest test-pair-indexes

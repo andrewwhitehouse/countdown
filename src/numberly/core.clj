@@ -97,6 +97,12 @@
                     :steps (conj steps {:left left :right right :op operator :result result})}))
           (pairs-indexes numbers)))
 
+(defn add-all [vec coll]
+  (reduce
+    (fn [acc item] (conj acc item))
+    vec
+    coll))
+
 (defn iterate-operator [{:keys [numbers steps] :as candidate-steps} operators total]
   (loop [remaining [candidate-steps]
          matched []]
@@ -107,10 +113,10 @@
             new-matches (filter matched? results)
             unmatched (remove matched? results)]
         (recur
-          (concat
-            (rest remaining)
+          (add-all
+            (subvec remaining 1)
             (filter #(> (count (:numbers %)) 1) unmatched))
-          (concat matched new-matches)))
+          (add-all matched new-matches)))
       matched)))
 
 
@@ -131,46 +137,9 @@
   (println "Numbers" (str/join " " (numbers 4 2)))
   (println "Target" (+ 200 (rand-int 800))))
 
-(comment
-
-  (clojure.pprint/pprint (solve [1 2 3 4] 7 '+))
-
-
-  )
-
-(comment
-  (def cnt 3)
-  (for [len (range 1 (inc cnt))
-        start-index (range cnt)]
-    {:len len :start-index start-index})
-  )
-
-
-(comment
-
-  (def numbers [1 9 3 1 75 100])
-  (def combos (mapcat #(combo/combinations numbers %) (range 2 7)))
-
-  )
-
-(comment
-
-  (def numbers [1 9 3 1 75 100])
-  (mapcat (fn [len] (combo/permuted-combinations numbers len)) (range 1 (count numbers)))
-
-  )
-
-(comment
-
-  (def cnt 4)
-  (distinct (for [start-index (range cnt)
-                  len (range 1 (inc cnt))
-                  interval (range 1 cnt)
-                  :when (<= (+ start-index len) cnt)]
-              (range start-index (+ start-index len) interval)))
-
-  (require '[clojure.math.combinatorics :as combo])
-  (combo/permutations [0 1 2 3])
-
-  (time (distinct (map sort (mapcat (fn [len] (combo/permuted-combinations numbers len)) (range 1 (count numbers))))))
-  )
+(defn -main [& args]
+  (let [before (System/currentTimeMillis)
+        result (solve [1 9 3 75 100] 843 ['+ '- '* '/])
+        after (System/currentTimeMillis)]
+    (println "result" result)
+    (println "time taken" (- after before) "ms")))
