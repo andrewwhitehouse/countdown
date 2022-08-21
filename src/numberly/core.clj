@@ -1,6 +1,7 @@
 (ns numberly.core
   (:require [clojure.string :as str]
-            [clojure.math.combinatorics :as combo]))
+            [clojure.math.combinatorics :as combo]
+            [clojure.pprint :refer [pprint]]))
 
 (defn numbers [small-count large-count]
   (if (not= 6 (+ small-count large-count))
@@ -113,10 +114,10 @@
             new-matches (filter matched? results)
             unmatched (remove matched? results)]
         (recur
-          (concat
-            (rest remaining)
+          (add-all
+            (subvec remaining 1)
             (filter #(> (count (:numbers %)) 1) unmatched))
-          (concat matched new-matches)))
+          (add-all matched new-matches)))
       matched)))
 
 
@@ -128,7 +129,6 @@
 (defn solve [numbers total operators]
   (->> numbers
       candidates
-     (debug->> "candidates")
       candidate-steps
       (mapcat #(iterate-operator % operators total))
        distinct))
@@ -137,9 +137,14 @@
   (println "Numbers" (str/join " " (numbers 4 2)))
   (println "Target" (+ 200 (rand-int 800))))
 
+(defn print-steps [{:keys [steps]}]
+  (str/join
+    "\n"
+    (mapv (fn [{:keys [left right op result]}] (str left op right "=" result)) steps)))
+
 (defn -main [& args]
   (let [before (System/currentTimeMillis)
-        result (solve [1 9 3 75 100] 843 ['+ '- '* '/])
+        result (solve [25 50 75 100 3 6] 952 ['+ '- '* '/])
         after (System/currentTimeMillis)]
-    (println "result" result)
+    (println (print-steps (first result)))
     (println "time taken" (- after before) "ms")))
